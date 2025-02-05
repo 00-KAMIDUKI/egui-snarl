@@ -62,13 +62,11 @@ impl Viewport {
 ///Use `SnarlStyle::background_pattern_stroke` for change stroke options
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 pub struct Grid {
     /// Spacing between grid lines.
     pub spacing: Vec2,
 
     /// Angle of the grid.
-    #[cfg_attr(feature = "egui-probe", egui_probe(as egui_probe::angle))]
     pub angle: f32,
 }
 
@@ -160,13 +158,11 @@ impl Grid {
 /// Background pattern show beneath nodes and wires.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 pub enum BackgroundPattern {
     /// No pattern.
     NoPattern,
 
     /// Linear grid.
-    #[cfg_attr(feature = "egui-probe", egui_probe(transparent))]
     Grid(Grid),
 }
 

@@ -3,9 +3,9 @@
 use std::{collections::HashMap, hash::Hash};
 
 use egui::{
-    collapsing_header::paint_default_icon, epaint::Shadow, pos2, vec2, Align, Color32, Frame, Id,
-    Layout, Margin, Modifiers, PointerButton, Pos2, Rect, Rounding, Sense, Shape, Stroke, Style,
-    Ui, UiBuilder, Vec2,
+    collapsing_header::paint_default_icon, epaint::Shadow, pos2, vec2, Align, Color32,
+    CornerRadius, Frame, Id, Layout, Margin, Modifiers, PointerButton, Pos2, Rect, Sense, Shape,
+    Stroke, Style, Ui, UiBuilder, Vec2,
 };
 
 use crate::{InPin, InPinId, Node, NodeId, OutPin, OutPinId, Snarl};
@@ -34,7 +34,6 @@ pub use self::{
 /// Controls how header, pins, body and footer are laid out in the node.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 pub enum NodeLayout {
     /// Input pins, body and output pins are placed horizontally.
     /// With header on top and footer on bottom.
@@ -86,13 +85,12 @@ pub enum NodeLayout {
 /// Controls style of node selection rect.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 pub struct SelectionStyle {
     /// Margin between selection rect and node frame.
     pub margin: Margin,
 
     /// Rounding of selection rect.
-    pub rounding: Rounding,
+    pub corner_radius: CornerRadius,
 
     /// Fill color of selection rect.
     pub fill: Color32,
@@ -104,7 +102,6 @@ pub struct SelectionStyle {
 /// Controls how pins are placed in the node.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 pub enum PinPlacement {
     /// Pins are placed inside the node frame.
     #[default]
@@ -123,7 +120,7 @@ pub enum PinPlacement {
 /// Style for rendering Snarl.
 #[derive(Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
+// #[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 pub struct SnarlStyle {
     /// Controls how nodes are laid out.
     /// Defaults to [`NodeLayout::Basic`].
@@ -178,7 +175,6 @@ pub struct SnarlStyle {
     pub collapsible: Option<bool>,
 
     /// Size of pins.
-    #[cfg_attr(feature = "egui-probe", egui_probe(range = 0.0..))]
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Option::is_none", default)
@@ -214,7 +210,6 @@ pub struct SnarlStyle {
     pub pin_placement: Option<PinPlacement>,
 
     /// Width of wires.
-    #[cfg_attr(feature = "egui-probe", egui_probe(range = 0.0..))]
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Option::is_none", default)
@@ -222,7 +217,6 @@ pub struct SnarlStyle {
     pub wire_width: Option<f32>,
 
     /// Size of wire frame which controls curvature of wires.
-    #[cfg_attr(feature = "egui-probe", egui_probe(range = 0.0..))]
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Option::is_none", default)
@@ -285,7 +279,6 @@ pub struct SnarlStyle {
     pub bg_pattern_stroke: Option<Stroke>,
 
     /// Minimum viewport scale that can be set.
-    #[cfg_attr(feature = "egui-probe", egui_probe(range = 0.0..=1.0))]
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Option::is_none", default)
@@ -293,7 +286,6 @@ pub struct SnarlStyle {
     pub min_scale: Option<f32>,
 
     /// Maximum viewport scale that can be set.
-    #[cfg_attr(feature = "egui-probe", egui_probe(range = 1.0..))]
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Option::is_none", default)
@@ -301,7 +293,6 @@ pub struct SnarlStyle {
     pub max_scale: Option<f32>,
 
     /// Velocity of viewport scale when scaling with mouse wheel.
-    #[cfg_attr(feature = "egui-probe", egui_probe(range = 0.0..))]
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Option::is_none", default)
@@ -342,7 +333,6 @@ pub struct SnarlStyle {
     pub select_style: Option<SelectionStyle>,
 
     #[doc(hidden)]
-    #[cfg_attr(feature = "egui-probe", egui_probe(skip))]
     #[cfg_attr(feature = "serde", serde(skip_serializing, default))]
     /// Do not access other than with .., here to emulate `#[non_exhaustive(pub)]`
     pub _non_exhaustive: (),
@@ -480,7 +470,7 @@ impl SnarlStyle {
             .zoomed(scale)
             .unwrap_or_else(|| SelectionStyle {
                 margin: style.spacing.window_margin,
-                rounding: style.visuals.window_rounding,
+                corner_radius: style.visuals.window_corner_radius,
                 fill: self.get_select_fill(style),
                 stroke: self.get_select_stroke(scale, style),
             })
@@ -495,7 +485,7 @@ mod serde_frame_option {
     pub struct Frame {
         pub inner_margin: egui::Margin,
         pub outer_margin: egui::Margin,
-        pub rounding: egui::Rounding,
+        pub corner_radius: egui::CornerRadius,
         pub shadow: egui::epaint::Shadow,
         pub fill: egui::Color32,
         pub stroke: egui::Stroke,
@@ -510,7 +500,7 @@ mod serde_frame_option {
             Some(frame) => Frame {
                 inner_margin: frame.inner_margin,
                 outer_margin: frame.outer_margin,
-                rounding: frame.rounding,
+                corner_radius: frame.corner_radius,
                 shadow: frame.shadow,
                 fill: frame.fill,
                 stroke: frame.stroke,
@@ -528,7 +518,7 @@ mod serde_frame_option {
         Ok(frame_opt.map(|frame| egui::Frame {
             inner_margin: frame.inner_margin,
             outer_margin: frame.outer_margin,
-            rounding: frame.rounding,
+            corner_radius: frame.corner_radius,
             shadow: frame.shadow,
             fill: frame.fill,
             stroke: frame.stroke,
@@ -668,7 +658,7 @@ impl<T> Snarl<T> {
             let mut node_moved = None;
             let mut node_to_top = None;
 
-            let mut bg_r = ui.allocate_rect(ui.max_rect(), Sense::click_and_drag());
+            let bg_r = ui.allocate_rect(ui.max_rect(), Sense::click_and_drag());
             let viewport = bg_r.rect;
             ui.set_clip_rect(viewport);
 
@@ -800,10 +790,6 @@ impl<T> Snarl<T> {
 
                             //Remove hovered wire by second click
                             hovered_wire_disconnect |= bg_r.clicked_by(PointerButton::Secondary);
-
-                            // Background is not hovered then.
-                            bg_r.hovered = false;
-                            bg_r.clicked = false;
                         }
                     }
                 }
@@ -889,6 +875,7 @@ impl<T> Snarl<T> {
                     0.0,
                     style.get_select_fill(ui.style()),
                     style.get_select_stroke(snarl_state.scale(), ui.style()),
+                    egui::StrokeKind::Inside,
                 );
             }
 
@@ -902,7 +889,6 @@ impl<T> Snarl<T> {
                 && ui.input(|x| x.pointer.button_down(PointerButton::Secondary))
             {
                 let _ = snarl_state.take_wires();
-                bg_r.clicked = false;
             }
 
             // Do centering unless no nodes are present.
@@ -949,9 +935,6 @@ impl<T> Snarl<T> {
                         // A new pin is dropped without connecting it anywhere. This
                         // will open a pop-up window for creating a new node.
                         snarl_state.revert_take_wires(new_wires);
-
-                        // Force open context menu.
-                        bg_r.long_touched = true;
                     }
                     _ => {}
                 }
@@ -1521,9 +1504,10 @@ impl<T> Snarl<T> {
 
             ui.painter().rect(
                 select_rect,
-                select_style.rounding,
+                select_style.corner_radius,
                 select_style.fill,
                 select_style.stroke,
+                egui::StrokeKind::Inside,
             );
         }
 
@@ -1601,9 +1585,10 @@ impl<T> Snarl<T> {
 
             // Input pins' center side by X axis.
             let input_x = match pin_placement {
-                PinPlacement::Inside => {
-                    pin_size.mul_add(0.5, node_frame_rect.left() + node_frame.inner_margin.left)
-                }
+                PinPlacement::Inside => pin_size.mul_add(
+                    0.5,
+                    node_frame_rect.left() + node_frame.inner_margin.left as f32,
+                ),
                 PinPlacement::Edge => node_frame_rect.left(),
                 PinPlacement::Outside { margin } => pin_size.mul_add(
                     -0.5,
@@ -1616,7 +1601,7 @@ impl<T> Snarl<T> {
                 PinPlacement::Inside => Some(pin_size),
                 PinPlacement::Edge => Some(
                     pin_size
-                        .mul_add(0.5, -node_frame.inner_margin.left)
+                        .mul_add(0.5, -node_frame.inner_margin.left as _)
                         .max(0.0),
                 ),
                 PinPlacement::Outside { .. } => None,
@@ -1626,7 +1611,7 @@ impl<T> Snarl<T> {
             let output_x = match pin_placement {
                 PinPlacement::Inside => pin_size.mul_add(
                     -0.5,
-                    node_frame_rect.right() - node_frame.inner_margin.right,
+                    node_frame_rect.right() - node_frame.inner_margin.right as f32,
                 ),
                 PinPlacement::Edge => node_frame_rect.right(),
                 PinPlacement::Outside { margin } => pin_size.mul_add(
@@ -1640,7 +1625,7 @@ impl<T> Snarl<T> {
                 PinPlacement::Inside => Some(pin_size),
                 PinPlacement::Edge => Some(
                     pin_size
-                        .mul_add(0.5, -node_frame.inner_margin.right)
+                        .mul_add(0.5, -node_frame.inner_margin.right as _)
                         .max(0.0),
                 ),
                 PinPlacement::Outside { .. } => None,

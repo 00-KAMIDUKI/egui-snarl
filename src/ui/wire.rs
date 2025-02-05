@@ -5,7 +5,6 @@ use egui::{epaint::PathShape, pos2, Color32, Pos2, Rect, Shape, Stroke, Ui};
 /// Layer where wires are rendered.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 #[derive(Default)]
 pub enum WireLayer {
     /// Wires are rendered behind nodes.
@@ -20,7 +19,6 @@ pub enum WireLayer {
 /// Controls style in which wire is rendered.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "egui-probe", derive(egui_probe::EguiProbe))]
 #[derive(Default)]
 pub enum WireStyle {
     /// Draw wire as 3rd degree Bezier curve.
