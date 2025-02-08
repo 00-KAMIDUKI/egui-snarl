@@ -10,11 +10,14 @@
 // #![warn(clippy::pedantic)]
 #![allow(clippy::inline_always, clippy::use_self)]
 
+mod controller;
 pub mod ui;
+
+pub use controller::Controller;
 
 use std::ops::{Index, IndexMut};
 
-use egui::{ahash::HashSet, Pos2};
+use egui::{Pos2, ahash::HashSet};
 use slab::Slab;
 
 impl<T> Default for Snarl<T> {
@@ -197,7 +200,6 @@ impl Wires {
 ///
 /// It holds graph state - positioned nodes and wires between their pins.
 /// It can be rendered using [`Snarl::show`].
-#[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Snarl<T> {
     // #[cfg_attr(feature = "serde", serde(with = "serde_nodes"))]

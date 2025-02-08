@@ -1,7 +1,7 @@
 use egui::{
+    FontId, Frame, Stroke, Style, Vec2, Visuals,
     epaint::{CornerRadius, Margin, Shadow},
     style::{Interaction, ScrollStyle, Spacing, TextCursorStyle, WidgetVisuals, Widgets},
-    FontId, Frame, Stroke, Style, Vec2, Visuals,
 };
 
 use super::{SelectionStyle, WireStyle};

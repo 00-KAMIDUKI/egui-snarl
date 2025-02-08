@@ -1,6 +1,6 @@
 use std::hash::Hash;
 
-use egui::{ahash::HashSet, style::Spacing, Context, Id, Pos2, Rect, Ui, Vec2};
+use egui::{Context, Id, Pos2, Rect, Ui, Vec2, ahash::HashSet, style::Spacing};
 
 use crate::{InPinId, NodeId, OutPinId, Snarl};
 
@@ -544,7 +544,7 @@ impl SnarlState {
             if pos == self.selected_nodes.len() - 1 {
                 return;
             }
-            self.selected_nodes.remove(pos);
+            self.selected_nodes.swap_remove(pos);
         }
         self.selected_nodes.push(node);
         self.dirty = true;
@@ -562,7 +562,7 @@ impl SnarlState {
 
     pub fn deselect_one_node(&mut self, node: NodeId) {
         if let Some(pos) = self.selected_nodes.iter().position(|n| *n == node) {
-            self.selected_nodes.remove(pos);
+            self.selected_nodes.swap_remove(pos);
             self.dirty = true;
         }
     }
@@ -570,7 +570,7 @@ impl SnarlState {
     pub fn deselect_many_nodes(&mut self, nodes: impl Iterator<Item = NodeId>) {
         for node in nodes {
             if let Some(pos) = self.selected_nodes.iter().position(|n| *n == node) {
-                self.selected_nodes.remove(pos);
+                self.selected_nodes.swap_remove(pos);
                 self.dirty = true;
             }
         }

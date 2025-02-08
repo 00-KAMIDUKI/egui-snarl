@@ -1,8 +1,8 @@
-use egui::{epaint::PathShape, vec2, Color32, Painter, Pos2, Shape, Stroke, Style, Vec2};
+use egui::{Color32, Painter, Pos2, Shape, Stroke, Style, Vec2, epaint::PathShape, vec2};
 
 use crate::{InPinId, OutPinId};
 
-use super::{zoom::Zoom, SnarlStyle, WireStyle};
+use super::{SnarlStyle, WireStyle, zoom::Zoom};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum AnyPin {
@@ -58,6 +58,9 @@ pub struct PinInfo {
 
     /// Style of the wire connected to the pin.
     pub wire_style: Option<WireStyle>,
+
+    /// Color of the wire connected to the pin.
+    pub wire_color: Option<Color32>,
 }
 
 impl PinInfo {
@@ -93,6 +96,13 @@ impl PinInfo {
     #[must_use]
     pub const fn with_wire_style(mut self, wire_style: WireStyle) -> Self {
         self.wire_style = Some(wire_style);
+        self
+    }
+
+    /// Sets the color of the wire connected to the pin.
+    #[must_use]
+    pub const fn with_wire_color(mut self, wire_color: Color32) -> Self {
+        self.wire_color = Some(wire_color);
         self
     }
 
@@ -152,6 +162,12 @@ impl PinInfo {
             .unwrap_or_else(|| snarl_style.get_pin_stroke(scale, style))
     }
 
+    /// Returns the color of the wire connected to the pin.
+    #[must_use]
+    pub fn get_wire_color(&self, snarl_style: &SnarlStyle, style: &Style) -> Color32 {
+        self.wire_color.unwrap_or_else(|| snarl_style.get_pin_fill(style))
+    }
+
     /// Draws the pin and returns color.
     ///
     /// Wires are drawn with returned color by default.
@@ -171,7 +187,7 @@ impl PinInfo {
         let size = self.size.zoomed(scale).unwrap_or(size);
         draw_pin(painter, shape, fill, stroke, pos, size);
 
-        fill
+        self.get_wire_color(snarl_style, style)
     }
 }
 

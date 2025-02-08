@@ -1,8 +1,8 @@
-use egui::{Color32, Painter, Pos2, Rect, Style, Ui};
+use egui::{Color32, Modifiers, Painter, Pos2, Rect, Style, Ui};
 
-use crate::{InPin, InPinId, NodeId, OutPin, OutPinId, Snarl};
+use crate::{Controller, InPin, InPinId, NodeId, OutPin, OutPinId, Snarl};
 
-use super::{pin::AnyPins, BackgroundPattern, NodeLayout, PinInfo, SnarlStyle, Viewport};
+use super::{BackgroundPattern, NodeLayout, PinInfo, SnarlStyle, Viewport};
 
 /// `SnarlViewer` is a trait for viewing a Snarl.
 ///
@@ -77,7 +77,7 @@ pub trait SnarlViewer<T> {
 
     /// Renders the node's input.
     fn show_input(&mut self, pin: &InPin, ui: &mut Ui, scale: f32, snarl: &mut Snarl<T>)
-        -> PinInfo;
+    -> PinInfo;
 
     /// Returns number of output pins of the node.
     ///
@@ -210,28 +210,6 @@ pub trait SnarlViewer<T> {
         let _ = (pos, ui, scale, snarl);
     }
 
-    /// Checks if the snarl has something to show in context menu if wire drag is stopped at `pos`.
-    #[inline]
-    fn has_dropped_wire_menu(&mut self, src_pins: AnyPins, snarl: &mut Snarl<T>) -> bool {
-        let _ = (src_pins, snarl);
-        false
-    }
-
-    /// Show context menu for the snarl. This menu is opened when releasing a pin to empty
-    /// space. It can be used to implement menu for adding new node, and directly
-    /// connecting it to the released wire.
-    #[inline]
-    fn show_dropped_wire_menu(
-        &mut self,
-        pos: Pos2,
-        ui: &mut Ui,
-        scale: f32,
-        src_pins: AnyPins,
-        snarl: &mut Snarl<T>,
-    ) {
-        let _ = (pos, ui, scale, src_pins, snarl);
-    }
-
     /// Checks if the node has something to show in context menu if right-clicked or long-touched on the node.
     #[inline]
     fn has_node_menu(&mut self, node: &T) -> bool {
@@ -355,5 +333,22 @@ pub trait SnarlViewer<T> {
         if let Some(background) = background {
             background.draw(viewport, snarl_style, style, painter);
         }
+    }
+
+    /// Called when a node is clicked.
+    /// By default it does nothing.
+    fn node_clicked(&mut self, modifiers: Modifiers, node: NodeId, controller: Controller) {
+        let _ = (modifiers, node, controller);
+    }
+
+    /// Called when a node is double-clicked.
+    /// By default it does nothing.
+    fn clicked(&mut self, modifiers: Modifiers, controller: Controller) {
+        let _ = (modifiers, controller);
+    }
+
+    /// Called when a frame is updated.
+    fn begin(&mut self, controller: Controller, snarl: &mut Snarl<T>) {
+        let _ = (controller, snarl);
     }
 }
