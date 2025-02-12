@@ -177,6 +177,13 @@ pub struct SnarlStyle {
     )]
     pub max_scale: Option<f32>,
 
+    /// Initial viewport scale.
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip_serializing_if = "Option::is_none", default)
+    )]
+    pub initial_scale: Option<f32>,
+
     /// Velocity of viewport scale when scaling with mouse wheel.
     #[cfg_attr(
         feature = "serde",
@@ -310,6 +317,10 @@ impl SnarlStyle {
 
     pub(crate) fn get_max_scale(&self) -> f32 {
         self.max_scale.unwrap_or(5.0)
+    }
+
+    pub(crate) fn get_initial_scale(&self) -> f32 {
+        self.initial_scale.unwrap_or(1.0)
     }
 
     pub(crate) fn get_scale_velocity(&self) -> f32 {

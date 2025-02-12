@@ -248,7 +248,7 @@ impl SnarlState {
         style: &SnarlStyle,
     ) -> Self {
         let Some(mut data) = SnarlStateData::load(cx, id) else {
-            return Self::initial(id, viewport, snarl, style);
+            return Self::initial(id, style);
         };
 
         let new_scale = cx.animate_value_with_time(id.with("zoom-scale"), data.target_scale, 0.1);
@@ -280,30 +280,11 @@ impl SnarlState {
         }
     }
 
-    fn initial<T>(id: Id, viewport: Rect, snarl: &Snarl<T>, style: &SnarlStyle) -> Self {
-        let mut bb = Rect::NOTHING;
-
-        for (_, node) in &snarl.nodes {
-            bb.extend_with(node.pos);
-        }
-
-        let mut offset = Vec2::ZERO;
-        let mut scale = 1.0f32.clamp(style.get_min_scale(), style.get_max_scale());
-
-        if bb.is_positive() {
-            bb = bb.expand(100.0);
-
-            let bb_size = bb.size();
-            let viewport_size = viewport.size();
-
-            scale = (viewport_size.x / bb_size.x)
-                .min(1.0)
-                .min(viewport_size.y / bb_size.y)
-                .min(style.get_max_scale())
-                .max(style.get_min_scale());
-
-            offset = bb.center().to_vec2() * scale;
-        }
+    fn initial(id: Id, style: &SnarlStyle) -> Self {
+        let offset = Vec2::ZERO;
+        let scale = style
+            .get_initial_scale()
+            .clamp(style.get_min_scale(), style.get_max_scale());
 
         SnarlState {
             offset,

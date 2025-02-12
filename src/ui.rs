@@ -191,6 +191,7 @@ impl SnarlStyle {
 
             min_scale: None,
             max_scale: None,
+            initial_scale: None,
             scale_velocity: None,
             node_frame: None,
             header_frame: None,
