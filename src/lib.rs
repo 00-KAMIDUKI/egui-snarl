@@ -52,8 +52,21 @@ pub struct Node<T> {
     pub pos: egui::Pos2,
 
     /// Flag indicating that the node is open - not collapsed.
+    #[cfg_attr(
+        feature = "serde",
+        serde(skip, default = "<bool as DefaultToTrue>::default_to_true")
+    )]
     pub open: bool,
 }
+
+#[cfg(feature = "serde")]
+trait DefaultToTrue {
+    fn default_to_true() -> bool {
+        true
+    }
+}
+#[cfg(feature = "serde")]
+impl DefaultToTrue for bool {}
 
 /// Output pin identifier.
 /// Cosists of node id and pin index.
