@@ -13,12 +13,13 @@ keywords = ["egui", "node", "graph", "ui", "node-graph"]
 categories = ["gui", "visualization"]
 
 [features]
-serde = ["dep:serde", "egui/serde", "slab/serde"]
+serde = ["dep:serde", "egui/serde", "slab/serde", "nonmax/serde"]
 
 [dependencies]
 egui = { version = "0.31" }
 slab = { version = "0.4" }
 serde = { version = "1.0", features = ["derive"], optional = true }
+nonmax = "0.5.5"
 # egui-probe = { version = "0.7.0", features = ["derive"], optional = true }
 
 [dev-dependencies]

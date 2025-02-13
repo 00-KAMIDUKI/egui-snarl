@@ -355,7 +355,7 @@ impl<T> Snarl<T> {
             let mut node_rects = Vec::new();
 
             for node_idx in draw_order {
-                if !self.nodes.contains(node_idx.0) {
+                if !self.nodes.contains(node_idx.get()) {
                     continue;
                 }
 
@@ -663,22 +663,22 @@ impl<T> Snarl<T> {
             ui.advance_cursor_after_rect(Rect::from_min_size(viewport.min, Vec2::ZERO));
 
             if let Some(node) = node_to_top {
-                if self.nodes.contains(node.0) {
+                if self.nodes.contains(node.get()) {
                     ui.ctx().request_repaint();
                     snarl_state.node_to_top(node);
                 }
             }
 
             if let Some((node, delta)) = node_moved {
-                if self.nodes.contains(node.0) {
+                if self.nodes.contains(node.get()) {
                     ui.ctx().request_repaint();
                     if snarl_state.selected_nodes().contains(&node) {
                         for node in snarl_state.selected_nodes() {
-                            let node = &mut self.nodes[node.0];
+                            let node = &mut self.nodes[node.get()];
                             node.pos += delta;
                         }
                     } else {
-                        let node = &mut self.nodes[node.0];
+                        let node = &mut self.nodes[node.get()];
                         node.pos += delta;
                     }
                 }
@@ -734,7 +734,7 @@ impl<T> Snarl<T> {
 
                 // Show input content
                 let pin_info = viewer.show_input(in_pin, ui, snarl_state.scale(), self);
-                if !self.nodes.contains(node.0) {
+                if !self.nodes.contains(node.get()) {
                     // If removed
                     return;
                 }
@@ -764,7 +764,7 @@ impl<T> Snarl<T> {
                         snarl_state.remove_new_wire_in(in_pin.id);
                     } else {
                         viewer.drop_inputs(in_pin, self);
-                        if !self.nodes.contains(node.0) {
+                        if !self.nodes.contains(node.get()) {
                             // If removed
                             return;
                         }
@@ -775,7 +775,7 @@ impl<T> Snarl<T> {
                         snarl_state.start_new_wires_out(&in_pin.remotes);
                         if !input.modifiers.shift {
                             self.drop_inputs(in_pin.id);
-                            if !self.nodes.contains(node.0) {
+                            if !self.nodes.contains(node.get()) {
                                 // If removed
                                 return;
                             }
@@ -886,7 +886,7 @@ impl<T> Snarl<T> {
 
                 // Show output content
                 let pin_info = viewer.show_output(out_pin, ui, snarl_state.scale(), self);
-                if !self.nodes.contains(node.0) {
+                if !self.nodes.contains(node.get()) {
                     // If removed
                     return;
                 }
@@ -915,7 +915,7 @@ impl<T> Snarl<T> {
                         snarl_state.remove_new_wire_out(out_pin.id);
                     } else {
                         viewer.drop_outputs(out_pin, self);
-                        if !self.nodes.contains(node.0) {
+                        if !self.nodes.contains(node.get()) {
                             // If removed
                             return;
                         }
@@ -927,7 +927,7 @@ impl<T> Snarl<T> {
 
                         if !input.modifiers.shift {
                             self.drop_outputs(out_pin.id);
-                            if !self.nodes.contains(node.0) {
+                            if !self.nodes.contains(node.get()) {
                                 // If removed
                                 return;
                             }
@@ -1053,7 +1053,7 @@ impl<T> Snarl<T> {
             pos,
             open,
             ref value,
-        } = self.nodes[node.0];
+        } = self.nodes[node.get()];
 
         let viewport = ui.max_rect();
 
@@ -1149,25 +1149,25 @@ impl<T> Snarl<T> {
             node_to_top = Some(node);
         }
 
-        if viewer.has_node_menu(&self.nodes[node.0].value) {
+        if viewer.has_node_menu(&self.nodes[node.get()].value) {
             r.context_menu(|ui| {
                 viewer.show_node_menu(node, &inputs, &outputs, ui, snarl_state.scale(), self);
             });
         }
 
-        if !self.nodes.contains(node.0) {
+        if !self.nodes.contains(node.get()) {
             node_state.clear(ui.ctx());
             // If removed
             return None;
         }
 
-        if viewer.has_on_hover_popup(&self.nodes[node.0].value) {
+        if viewer.has_on_hover_popup(&self.nodes[node.get()].value) {
             r.on_hover_ui_at_pointer(|ui| {
                 viewer.show_on_hover_popup(node, &inputs, &outputs, ui, snarl_state.scale(), self);
             });
         }
 
-        if !self.nodes.contains(node.0) {
+        if !self.nodes.contains(node.get()) {
             node_state.clear(ui.ctx());
             // If removed
             return None;
@@ -1292,7 +1292,7 @@ impl<T> Snarl<T> {
                     let inputs_rect = r.final_rect;
                     let inputs_size = inputs_rect.size();
 
-                    if !self.nodes.contains(node.0) {
+                    if !self.nodes.contains(node.get()) {
                         // If removed
                         return;
                     }
@@ -1326,7 +1326,7 @@ impl<T> Snarl<T> {
                     let outputs_rect = r.final_rect;
                     let outputs_size = outputs_rect.size();
 
-                    if !self.nodes.contains(node.0) {
+                    if !self.nodes.contains(node.get()) {
                         // If removed
                         return;
                     }
@@ -1339,7 +1339,7 @@ impl<T> Snarl<T> {
                     let mut pins_rect = inputs_rect.union(outputs_rect);
 
                     // Show body if there's one.
-                    if viewer.has_body(&self.nodes.get(node.0).unwrap().value) {
+                    if viewer.has_body(&self.nodes.get(node.get()).unwrap().value) {
                         let body_left = inputs_rect.right() + ui.spacing().item_spacing.x;
                         let body_right = outputs_rect.left() - ui.spacing().item_spacing.x;
                         let body_top = payload_rect.top();
@@ -1367,7 +1367,7 @@ impl<T> Snarl<T> {
 
                         pins_rect = pins_rect.union(body_rect);
 
-                        if !self.nodes.contains(node.0) {
+                        if !self.nodes.contains(node.get()) {
                             // If removed
                             return;
                         }
@@ -1409,7 +1409,7 @@ impl<T> Snarl<T> {
 
                     let mut next_y = inputs_rect.bottom() + ui.spacing().item_spacing.y;
 
-                    if !self.nodes.contains(node.0) {
+                    if !self.nodes.contains(node.get()) {
                         // If removed
                         return;
                     }
@@ -1417,7 +1417,7 @@ impl<T> Snarl<T> {
                     let mut pins_rect = inputs_rect;
 
                     // Show body if there's one.
-                    if viewer.has_body(&self.nodes.get(node.0).unwrap().value) {
+                    if viewer.has_body(&self.nodes.get(node.get()).unwrap().value) {
                         let body_rect = payload_rect.intersect(Rect::everything_below(next_y));
 
                         let r = self.draw_body(
@@ -1437,7 +1437,7 @@ impl<T> Snarl<T> {
                         new_pins_size.x = f32::max(new_pins_size.x, body_rect.width());
                         new_pins_size.y += body_rect.height() + ui.spacing().item_spacing.y;
 
-                        if !self.nodes.contains(node.0) {
+                        if !self.nodes.contains(node.get()) {
                             // If removed
                             return;
                         }
@@ -1476,7 +1476,7 @@ impl<T> Snarl<T> {
 
                     let outputs_rect = r.final_rect;
 
-                    if !self.nodes.contains(node.0) {
+                    if !self.nodes.contains(node.get()) {
                         // If removed
                         return;
                     }
@@ -1522,7 +1522,7 @@ impl<T> Snarl<T> {
 
                     let mut next_y = outputs_rect.bottom() + ui.spacing().item_spacing.y;
 
-                    if !self.nodes.contains(node.0) {
+                    if !self.nodes.contains(node.get()) {
                         // If removed
                         return;
                     }
@@ -1530,7 +1530,7 @@ impl<T> Snarl<T> {
                     let mut pins_rect = outputs_rect;
 
                     // Show body if there's one.
-                    if viewer.has_body(&self.nodes.get(node.0).unwrap().value) {
+                    if viewer.has_body(&self.nodes.get(node.get()).unwrap().value) {
                         let body_rect = payload_rect.intersect(Rect::everything_below(next_y));
 
                         let r = self.draw_body(
@@ -1550,7 +1550,7 @@ impl<T> Snarl<T> {
                         new_pins_size.x = f32::max(new_pins_size.x, body_rect.width());
                         new_pins_size.y += body_rect.height() + ui.spacing().item_spacing.y;
 
-                        if !self.nodes.contains(node.0) {
+                        if !self.nodes.contains(node.get()) {
                             // If removed
                             return;
                         }
@@ -1589,7 +1589,7 @@ impl<T> Snarl<T> {
 
                     let inputs_rect = r.final_rect;
 
-                    if !self.nodes.contains(node.0) {
+                    if !self.nodes.contains(node.get()) {
                         // If removed
                         return;
                     }
@@ -1603,7 +1603,7 @@ impl<T> Snarl<T> {
                 }
             };
 
-            if viewer.has_footer(&self.nodes[node.0].value) {
+            if viewer.has_footer(&self.nodes[node.get()].value) {
                 let footer_left = node_rect.left();
                 let footer_right = node_rect.right();
                 let footer_top = pins_rect.bottom() + ui.spacing().item_spacing.y;
@@ -1638,7 +1638,7 @@ impl<T> Snarl<T> {
                 new_pins_size.x = f32::max(new_pins_size.x, footer_size.x);
                 new_pins_size.y += footer_size.y + ui.spacing().item_spacing.y;
 
-                if !self.nodes.contains(node.0) {
+                if !self.nodes.contains(node.get()) {
                     // If removed
                     return;
                 }
@@ -1703,7 +1703,7 @@ impl<T> Snarl<T> {
             ));
         });
 
-        if !self.nodes.contains(node.0) {
+        if !self.nodes.contains(node.get()) {
             ui.ctx().request_repaint();
             node_state.clear(ui.ctx());
             // If removed

@@ -234,7 +234,7 @@ impl SnarlStateData {
 
 fn prune_selected_nodes<T>(selected_nodes: &mut Vec<NodeId>, snarl: &Snarl<T>) -> bool {
     let old_size = selected_nodes.len();
-    selected_nodes.retain(|node| snarl.nodes.contains(node.0));
+    selected_nodes.retain(|node| snarl.nodes.contains(node.get()));
     old_size != selected_nodes.len()
 }
 
@@ -479,7 +479,7 @@ impl SnarlState {
         let mut node_ids = snarl
             .nodes
             .iter()
-            .map(|(id, _)| NodeId(id))
+            .map(|(id, _)| NodeId::new(id))
             .collect::<HashSet<_>>();
 
         self.draw_order.retain(|id| {

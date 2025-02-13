@@ -14,6 +14,7 @@ mod controller;
 pub mod ui;
 
 pub use controller::Controller;
+use nonmax::NonMaxUsize;
 
 use std::ops::{Index, IndexMut};
 
@@ -37,7 +38,18 @@ impl<T> Default for Snarl<T> {
     derive(serde::Serialize, serde::Deserialize),
     serde(transparent)
 )]
-pub struct NodeId(pub usize);
+pub struct NodeId(NonMaxUsize);
+impl NodeId {
+    #[inline(always)]
+    fn new(idx: usize) -> Self {
+        Self(unsafe { NonMaxUsize::new_unchecked(idx) })
+    }
+
+    #[inline(always)]
+    fn get(self) -> usize {
+        self.0.get()
+    }
+}
 
 /// Node of the graph.
 #[derive(Clone, Debug)]
@@ -254,7 +266,7 @@ impl<T> Snarl<T> {
             open: true,
         });
 
-        NodeId(idx)
+        NodeId::new(idx)
     }
 
     /// Adds a node to the Snarl in collapsed state.
@@ -274,7 +286,7 @@ impl<T> Snarl<T> {
             open: false,
         });
 
-        NodeId(idx)
+        NodeId::new(idx)
     }
 
     /// Opens or collapses a node.
@@ -284,7 +296,7 @@ impl<T> Snarl<T> {
     /// Panics if the node does not exist.
     #[track_caller]
     pub fn open_node(&mut self, node: NodeId, open: bool) {
-        self.nodes[node.0].open = open;
+        self.nodes[node.get()].open = open;
     }
 
     /// Removes a node from the Snarl.
@@ -304,7 +316,7 @@ impl<T> Snarl<T> {
     /// ```
     #[track_caller]
     pub fn remove_node(&mut self, idx: NodeId) -> T {
-        let value = self.nodes.remove(idx.0).value;
+        let value = self.nodes.remove(idx.get()).value;
         self.wires.drop_node(idx);
         value
     }
@@ -318,8 +330,8 @@ impl<T> Snarl<T> {
     /// Panics if either node does not exist.
     #[track_caller]
     pub fn connect(&mut self, from: OutPinId, to: InPinId) -> bool {
-        assert!(self.nodes.contains(from.node.0));
-        assert!(self.nodes.contains(to.node.0));
+        assert!(self.nodes.contains(from.node.get()));
+        assert!(self.nodes.contains(to.node.get()));
 
         let wire = Wire {
             out_pin: from,
@@ -336,8 +348,8 @@ impl<T> Snarl<T> {
     /// Panics if either node does not exist.
     #[track_caller]
     pub fn disconnect(&mut self, from: OutPinId, to: InPinId) -> bool {
-        assert!(self.nodes.contains(from.node.0));
-        assert!(self.nodes.contains(to.node.0));
+        assert!(self.nodes.contains(from.node.get()));
+        assert!(self.nodes.contains(to.node.get()));
 
         let wire = Wire {
             out_pin: from,
@@ -356,7 +368,7 @@ impl<T> Snarl<T> {
     /// Panics if the node does not exist.
     #[track_caller]
     pub fn drop_inputs(&mut self, pin: InPinId) -> usize {
-        assert!(self.nodes.contains(pin.node.0));
+        assert!(self.nodes.contains(pin.node.get()));
         self.wires.drop_inputs(pin)
     }
 
@@ -368,19 +380,19 @@ impl<T> Snarl<T> {
     /// Panics if the node does not exist.
     #[track_caller]
     pub fn drop_outputs(&mut self, pin: OutPinId) -> usize {
-        assert!(self.nodes.contains(pin.node.0));
+        assert!(self.nodes.contains(pin.node.get()));
         self.wires.drop_outputs(pin)
     }
 
     /// Returns reference to the node.
     #[must_use]
     pub fn get_node(&self, idx: NodeId) -> Option<&T> {
-        self.nodes.get(idx.0).map(|node| &node.value)
+        self.nodes.get(idx.get()).map(|node| &node.value)
     }
 
     /// Returns mutable reference to the node.
     pub fn get_node_mut(&mut self, idx: NodeId) -> Option<&mut T> {
-        match self.nodes.get_mut(idx.0) {
+        match self.nodes.get_mut(idx.get()) {
             Some(node) => Some(&mut node.value),
             None => None,
         }
@@ -389,12 +401,12 @@ impl<T> Snarl<T> {
     /// Returns reference to the node data.
     #[must_use]
     pub fn get_node_info(&self, idx: NodeId) -> Option<&Node<T>> {
-        self.nodes.get(idx.0)
+        self.nodes.get(idx.get())
     }
 
     /// Returns mutable reference to the node data.
     pub fn get_node_info_mut(&mut self, idx: NodeId) -> Option<&mut Node<T>> {
-        self.nodes.get_mut(idx.0)
+        self.nodes.get_mut(idx.get())
     }
 
     /// Iterates over shared references to each node.
@@ -505,7 +517,7 @@ impl<T> Index<NodeId> for Snarl<T> {
     #[inline]
     #[track_caller]
     fn index(&self, idx: NodeId) -> &Self::Output {
-        &self.nodes[idx.0].value
+        &self.nodes[idx.get()].value
     }
 }
 
@@ -513,7 +525,7 @@ impl<T> IndexMut<NodeId> for Snarl<T> {
     #[inline]
     #[track_caller]
     fn index_mut(&mut self, idx: NodeId) -> &mut Self::Output {
-        &mut self.nodes[idx.0].value
+        &mut self.nodes[idx.get()].value
     }
 }
 
@@ -628,12 +640,12 @@ impl<'a, T> Iterator for NodesIdsIter<'a, T> {
 
     fn next(&mut self) -> Option<(NodeId, &'a T)> {
         let (idx, node) = self.nodes.next()?;
-        Some((NodeId(idx), &node.value))
+        Some((NodeId::new(idx), &node.value))
     }
 
     fn nth(&mut self, n: usize) -> Option<(NodeId, &'a T)> {
         let (idx, node) = self.nodes.nth(n)?;
-        Some((NodeId(idx), &node.value))
+        Some((NodeId::new(idx), &node.value))
     }
 }
 
@@ -652,12 +664,12 @@ impl<'a, T> Iterator for NodesIdsIterMut<'a, T> {
 
     fn next(&mut self) -> Option<(NodeId, &'a mut T)> {
         let (idx, node) = self.nodes.next()?;
-        Some((NodeId(idx), &mut node.value))
+        Some((NodeId::new(idx), &mut node.value))
     }
 
     fn nth(&mut self, n: usize) -> Option<(NodeId, &'a mut T)> {
         let (idx, node) = self.nodes.nth(n)?;
-        Some((NodeId(idx), &mut node.value))
+        Some((NodeId::new(idx), &mut node.value))
     }
 }
 
@@ -676,12 +688,12 @@ impl<'a, T> Iterator for NodesPosIdsIter<'a, T> {
 
     fn next(&mut self) -> Option<(NodeId, Pos2, &'a T)> {
         let (idx, node) = self.nodes.next()?;
-        Some((NodeId(idx), node.pos, &node.value))
+        Some((NodeId::new(idx), node.pos, &node.value))
     }
 
     fn nth(&mut self, n: usize) -> Option<(NodeId, Pos2, &'a T)> {
         let (idx, node) = self.nodes.nth(n)?;
-        Some((NodeId(idx), node.pos, &node.value))
+        Some((NodeId::new(idx), node.pos, &node.value))
     }
 }
 
@@ -700,12 +712,12 @@ impl<'a, T> Iterator for NodesPosIdsIterMut<'a, T> {
 
     fn next(&mut self) -> Option<(NodeId, Pos2, &'a mut T)> {
         let (idx, node) = self.nodes.next()?;
-        Some((NodeId(idx), node.pos, &mut node.value))
+        Some((NodeId::new(idx), node.pos, &mut node.value))
     }
 
     fn nth(&mut self, n: usize) -> Option<(NodeId, Pos2, &'a mut T)> {
         let (idx, node) = self.nodes.nth(n)?;
-        Some((NodeId(idx), node.pos, &mut node.value))
+        Some((NodeId::new(idx), node.pos, &mut node.value))
     }
 }
 
@@ -772,12 +784,12 @@ impl<'a, T> Iterator for NodeIdsDataIter<'a, T> {
 
     fn next(&mut self) -> Option<(NodeId, &'a Node<T>)> {
         let (id, node) = self.nodes.next()?;
-        Some((NodeId(id), node))
+        Some((NodeId::new(id), node))
     }
 
     fn nth(&mut self, n: usize) -> Option<(NodeId, &'a Node<T>)> {
         let (id, node) = self.nodes.nth(n)?;
-        Some((NodeId(id), node))
+        Some((NodeId::new(id), node))
     }
 }
 
@@ -796,12 +808,12 @@ impl<'a, T> Iterator for NodeIdsDataIterMut<'a, T> {
 
     fn next(&mut self) -> Option<(NodeId, &'a mut Node<T>)> {
         let (id, node) = self.nodes.next()?;
-        Some((NodeId(id), node))
+        Some((NodeId::new(id), node))
     }
 
     fn nth(&mut self, n: usize) -> Option<(NodeId, &'a mut Node<T>)> {
         let (id, node) = self.nodes.nth(n)?;
-        Some((NodeId(id), node))
+        Some((NodeId::new(id), node))
     }
 }
 
