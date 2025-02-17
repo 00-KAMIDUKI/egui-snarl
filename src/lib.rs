@@ -330,8 +330,8 @@ impl<T> Snarl<T> {
     /// Panics if either node does not exist.
     #[track_caller]
     pub fn connect(&mut self, from: OutPinId, to: InPinId) -> bool {
-        assert!(self.nodes.contains(from.node.get()));
-        assert!(self.nodes.contains(to.node.get()));
+        debug_assert!(self.nodes.contains(from.node.get()));
+        debug_assert!(self.nodes.contains(to.node.get()));
 
         let wire = Wire {
             out_pin: from,
@@ -348,8 +348,8 @@ impl<T> Snarl<T> {
     /// Panics if either node does not exist.
     #[track_caller]
     pub fn disconnect(&mut self, from: OutPinId, to: InPinId) -> bool {
-        assert!(self.nodes.contains(from.node.get()));
-        assert!(self.nodes.contains(to.node.get()));
+        debug_assert!(self.nodes.contains(from.node.get()));
+        debug_assert!(self.nodes.contains(to.node.get()));
 
         let wire = Wire {
             out_pin: from,
@@ -368,7 +368,7 @@ impl<T> Snarl<T> {
     /// Panics if the node does not exist.
     #[track_caller]
     pub fn drop_inputs(&mut self, pin: InPinId) -> usize {
-        assert!(self.nodes.contains(pin.node.get()));
+        debug_assert!(self.nodes.contains(pin.node.get()));
         self.wires.drop_inputs(pin)
     }
 
@@ -380,7 +380,7 @@ impl<T> Snarl<T> {
     /// Panics if the node does not exist.
     #[track_caller]
     pub fn drop_outputs(&mut self, pin: OutPinId) -> usize {
-        assert!(self.nodes.contains(pin.node.get()));
+        debug_assert!(self.nodes.contains(pin.node.get()));
         self.wires.drop_outputs(pin)
     }
 
