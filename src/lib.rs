@@ -175,6 +175,11 @@ impl Wires {
         }
     }
 
+    #[cfg(feature = "serde")]
+    fn is_empty(&self) -> bool {
+        self.wires.is_empty()
+    }
+
     fn insert(&mut self, wire: Wire) -> bool {
         self.wires.insert(wire)
     }
@@ -226,9 +231,11 @@ impl Wires {
 /// It holds graph state - positioned nodes and wires between their pins.
 /// It can be rendered using [`Snarl::show`].
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(default))]
 pub struct Snarl<T> {
-    // #[cfg_attr(feature = "serde", serde(with = "serde_nodes"))]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Slab::is_empty"))]
     nodes: Slab<Node<T>>,
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Wires::is_empty"))]
     wires: Wires,
 }
 
