@@ -592,7 +592,7 @@ impl<T> Snarl<T> {
                         }
 
                         viewer.show_graph_menu(
-                            snarl_state.screen_pos_to_graph(ui.cursor().min, viewport),
+                            snarl_state.screen_pos_to_graph(interact_pos, viewport),
                             ui,
                             snarl_state.scale(),
                             self,
